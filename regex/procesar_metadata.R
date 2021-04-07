@@ -8,27 +8,28 @@ library(readr)
 library(dplyr)
 library(stringr)
 library(tidyr)
+library(janitor)
 
 # Leer archivo ------------------------------------------------------------
-text <- file("metadata_german_departments.txt", open = "r")
+text <- file("metadata_german_department.txt", open = "r")
 lines <- readLines(text, encoding = "UTF-8") #conviene usar este método para que no se salte las files que empiezan con caracteres especiales
 metadata <- as_tibble(lines)
 
 
 # Transformar de filas a columnas usando expresiones regulares y pivot_wider------------
-metadata <- metadata %>%
+metadata_tb <- metadata %>%
   mutate(value = case_when(
-    lead(str_detect(value, "^Author:")) ~ str_c("Title: ", value),
+    lead(stringr::str_detect(value, "^Author:")) ~ str_c("Title: ", value),
     #Si fila X tiene debajo algo que coincide con str_detect(X1, "^Author:"), le agrega "Title: " a esa fila X.
     TRUE ~ as.character(value)
   )) %>% 
-  filter(str_detect(value, "^Author: |^Title: |^Publication info: |^Subject: ")) %>% #acá se filtran las líneas con el patrón deseado
-  separate(value, into = c("variable", "data"), sep = ": ", extra = "merge") %>% #se dividen las variables del contenido usando ": " como separador
-  mutate(id = rep(1:100, each = 4), .before = variable) %>% # se le da el mismo id a los grupos de metadatos
-  pivot_wider(names_from = variable, values_from = data) %>% #usar variable como nombre de columna y rellenar con el contenido (data)
-  rename(Publication_info = 'Publication info') %>% #renombrar columna para evitar nombres con espacios
-  select(., -id) #eliminar columna de "ids"
-
-
+  dplyr::filter(stringr::str_detect(value, "^Author: |^Title: |^University/institution: |^Subject: |^Abstract: ")) %>% #acá se filtran las líneas con el patrón deseado
+  tidyr::separate(value, into = c("variable", "data"), sep = ": ", extra = "merge") %>% #se dividen las variables del contenido usando ": " como separador
+  dplyr::group_by(variable) %>% #se crean grupos según los nombres en las variables
+  dplyr::mutate(row = row_number()) %>% #se agrega número de fila para poder hacer el pivot_wider
+  tidyr::pivot_wider(names_from = variable, values_from = data) %>% 
+  janitor::clean_names() %>% #para que los nombres sean uniformes (sin signos de puntuación, mayúsculas, etc) 
+  dplyr::select(-row)
+ 
 # Crear csv con resultado -------------------------------------------------
-write_csv(metadata, "metadata.csv")
+write_csv(metadata_tb, "metadata.csv")
