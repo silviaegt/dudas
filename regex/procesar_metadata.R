@@ -11,7 +11,7 @@ library(tidyr)
 library(janitor)
 
 # Leer archivo ------------------------------------------------------------
-text <- file("metadata_german_department.txt", open = "r")
+text <- file("metadata_german_departments.txt", open = "r") #ver archivo: https://github.com/silviaegt/dudas/blob/master/regex/metadata_german_departments
 lines <- readLines(text, encoding = "UTF-8") #conviene usar este método para que no se salte las files que empiezan con caracteres especiales
 metadata <- as_tibble(lines)
 
