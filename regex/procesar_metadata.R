@@ -26,7 +26,7 @@ metadata_tb <- metadata %>%
   dplyr::filter(stringr::str_detect(value, "^Author: |^Title: |^University/institution: |^Subject: |^Abstract: ")) %>% #acá se filtran las líneas con el patrón deseado
   tidyr::separate(value, into = c("variable", "data"), sep = ": ", extra = "merge") %>% #se dividen las variables del contenido usando ": " como separador
   dplyr::group_by(variable) %>% #se crean grupos según los nombres en las variables
-  dplyr::mutate(row = row_number()) %>% #se agrega número de fila para poder hacer el pivot_wider
+  dplyr::mutate(row = row_number()) %>% #se agregan números para hacer el pivot_wider (pondrá el mismo id por "paquetes" de las n variables)
   tidyr::pivot_wider(names_from = variable, values_from = data) %>% 
   janitor::clean_names() %>% #para que los nombres sean uniformes (sin signos de puntuación, mayúsculas, etc) 
   dplyr::select(-row)
