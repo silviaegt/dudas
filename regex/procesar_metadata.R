@@ -17,6 +17,25 @@ authors <- str_subset(lines, "(^Author:.\\w+\\,\\s\\w+)")
 #Ver: https://twitter.com/LuisDVerde/status/1379635446288949248
 
 
+
+library(readr)
+library(dplyr)
+library(stringr)
+library(tidyr)
+
+metadata <- read_tsv("https://raw.githubusercontent.com/silviaegt/dudas/master/regex/metadata_german_departments", col_names = FALSE)
+
+metadata %>%
+  mutate(X1 = case_when(
+    lead(str_detect(X1, "^Author:")) ~ str_c("Title: ", X1),
+    TRUE ~ as.character(X1)
+  )) %>% 
+  filter(str_detect(X1, "^Author: |^Title: ")) %>% 
+  separate(X1, into = c("variable", "data"), extra = "merge") %>% 
+  mutate(id = rep(1:83, each = 2), .before = variable) %>% 
+  pivot_wider(names_from = variable, values_from = data) 
+
+
 #intento para extraer títulos:
 #titles <- str_subset(lines, "(\\n).*(\\nAuthor:\\s)")
 
