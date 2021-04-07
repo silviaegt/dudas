@@ -1,6 +1,6 @@
 #Propuesta de @svrvhi (Sarahí Aguilar) para resolver problema
 
-#Si se lee con encoding se obtienen 36 observaciones al final
+#Si se abre "file" con encoding se obtienen 36 observaciones al final
 #text <- file("metadata_german_department.txt", encoding= "UTF-8", open = "r")
 text <- file("metadata_german_department.txt", open = "r")
 lines <- readLines(text, encoding = "UTF-8")
